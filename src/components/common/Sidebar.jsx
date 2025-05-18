@@ -1,15 +1,9 @@
+// components/Sidebar.jsx
 import { NavLink } from 'react-router-dom'
-import { 
-  HomeIcon, 
-  RssIcon, 
-  UserIcon, 
-  UploadIcon, 
-  ChatIcon, 
-  CalendarIcon, 
-  SearchIcon, 
-  ChevronLeftIcon, 
-  ChevronRightIcon, 
-  LogoutIcon 
+import {
+  HomeIcon, RssIcon, UserIcon, UploadIcon,
+  ChatIcon, CalendarIcon, SearchIcon,
+  ChevronLeftIcon, ChevronRightIcon, LogoutIcon
 } from '@heroicons/react/outline'
 import Logo from './Logo'
 
@@ -29,23 +23,21 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
     window.location.href = '/login'
   }
 
-  const activeClass = "bg-dark-lightest text-primary"
+  const activeClass = "bg-gradient-to-r from-primary/20 to-transparent text-primary font-semibold"
   const inactiveClass = "text-light-muted hover:bg-dark-lightest hover:text-light"
-  const baseClass = "flex items-center px-4 py-3 rounded-md transition-colors duration-200"
+  const baseClass = "flex items-center px-4 py-3 rounded-xl transition-all duration-200"
 
   return (
-    <div className="flex flex-col h-full bg-dark-lighter border-r border-dark-border">
+    <div className="flex flex-col h-full bg-dark-lighter/80 backdrop-blur border-r border-dark-border shadow-md">
       <div className="flex items-center justify-between h-16 px-4">
-        {!isCollapsed && <Logo size="small" />}
-        {isCollapsed && <div className="w-full flex justify-center">
-          <Logo size="small" linkTo="#" />
-        </div>}
-        <button onClick={toggleSidebar} className="rounded-md p-1 text-light-muted hover:bg-dark-lightest hover:text-light">
+        {!isCollapsed ? <Logo size="small" /> :
+          <div className="w-full flex justify-center"><Logo size="small" linkTo="#" /></div>}
+        <button onClick={toggleSidebar} className="rounded p-1 text-light-muted hover:bg-dark-lightest hover:text-light transition">
           {isCollapsed ? <ChevronRightIcon className="h-5 w-5" /> : <ChevronLeftIcon className="h-5 w-5" />}
         </button>
       </div>
 
-      <div className="flex flex-col flex-1 overflow-y-auto py-4">
+      <div className="flex-1 overflow-y-auto py-4 scrollbar-thin scrollbar-thumb-dark-border scrollbar-track-transparent">
         {menuItems.map((item) => (
           <NavLink
             key={item.path}
@@ -61,7 +53,7 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
       </div>
 
       <div className="p-4">
-        <button 
+        <button
           onClick={handleLogout}
           className={`${baseClass} ${inactiveClass} w-full ${isCollapsed ? 'justify-center' : 'justify-start'}`}
         >
@@ -73,4 +65,4 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
   )
 }
 
-export default Sidebar;
+export default Sidebar
