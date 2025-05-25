@@ -73,4 +73,4 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
   )
 }
 
-export default Sidebar;
+export default Sidebar

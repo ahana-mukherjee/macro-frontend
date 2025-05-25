@@ -90,4 +90,4 @@ function Navbar({ onMenuClick }) {
   )
 }
 
-export default Navbar;
+export default Navbar
