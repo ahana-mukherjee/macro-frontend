@@ -1,86 +1,97 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 
 const ChatSidebar = ({ conversations, activeConversation, onSelectConversation }) => {
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
   
-  const filteredConversations = (Array.isArray(conversations) ? conversations : []).filter(conversation => 
-    conversation.user.username.toLowerCase().includes(searchTerm.toLowerCase())
+  // Filter conversations based on search query
+  const filteredConversations = conversations.filter(
+    conversation => 
+      conversation.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      conversation.username.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
+  
   return (
-    <div className="w-80 flex-shrink-0 bg-gray-900 border-r border-gray-800 flex flex-col">
-      <div className="p-4 border-b border-gray-800">
-        <h2 className="text-xl font-bold text-white mb-4">Messages</h2>
+    <div className="w-80 flex-shrink-0 bg-dark-DEFAULT border-r border-dark-border rounded-l-lg">
+      {/* Search Bar */}
+      <div className="p-4 border-b border-dark-border">
         <div className="relative">
           <input
             type="text"
-            placeholder="Search conversations"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-gray-800 text-white px-4 py-2 rounded-md border border-gray-700 focus:outline-none focus:border-purple-500"
+            placeholder="Search conversations..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full bg-dark-lighter text-light-DEFAULT px-4 py-2 pl-10 rounded-md border border-dark-border focus:outline-none focus:border-primary"
           />
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 absolute right-3 top-2.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5 absolute left-3 top-2.5 text-light-subtle"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
           </svg>
         </div>
       </div>
       
-      <div className="flex-grow overflow-y-auto">
-        {filteredConversations.length > 0 ? (
+      {/* Conversations List */}
+      <div className="h-full overflow-y-auto pb-20">
+        <h3 className="text-xs font-semibold uppercase tracking-wider text-light-subtle p-4">Messages</h3>
+        
+        {filteredConversations.length === 0 ? (
+          <div className="text-center py-8 text-light-subtle">
+            No conversations found
+          </div>
+        ) : (
           <ul>
-            {filteredConversations.map(conversation => (
-              <li 
-                key={conversation.id}
-                onClick={() => onSelectConversation(conversation)}
-                className={`p-4 border-b border-gray-800 cursor-pointer transition-colors ${
-                  activeConversation?.id === conversation.id 
-                    ? 'bg-purple-900 bg-opacity-30' 
-                    : 'hover:bg-gray-800'
-                }`}
-              >
-                <div className="flex items-start">
-                  <div className="relative flex-shrink-0">
-                    <img 
-                      src={conversation.user.avatar_url || 'https://via.placeholder.com/40'} 
-                      alt={conversation.user.username}
+            {filteredConversations.map((conversation) => (
+              <li key={conversation.id}>
+                <button
+                  onClick={() => onSelectConversation(conversation)}
+                  className={`w-full text-left px-4 py-3 flex items-start hover:bg-dark-lighter transition-colors ${
+                    activeConversation?.id === conversation.id ? 'bg-dark-lighter' : ''
+                  }`}
+                >
+                  <div className="relative mr-3 flex-shrink-0">
+                    <img
+                      src={conversation.avatar_url}
+                      alt={conversation.name}
                       className="w-10 h-10 rounded-full object-cover"
                     />
-                    {conversation.user.is_online && (
-                      <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-gray-900"></span>
+                    {conversation.online && (
+                      <span className="absolute bottom-0 right-0 block h-2.5 w-2.5 rounded-full bg-secondary border-2 border-dark-DEFAULT"></span>
                     )}
                   </div>
-                  <div className="ml-3 flex-grow">
-                    <div className="flex justify-between items-center">
-                      <h3 className="font-semibold text-white">{conversation.user.username}</h3>
-                      <span className="text-xs text-gray-400">
-                        {formatDistanceToNow(new Date(conversation.last_message?.created_at || conversation.created_at), { addSuffix: true })}
+                  
+                  <div className="flex-grow min-w-0">
+                    <div className="flex justify-between items-baseline">
+                      <h4 className="text-sm font-medium text-light-DEFAULT truncate">{conversation.name}</h4>
+                      <span className="text-xs text-light-subtle">
+                        {formatDistanceToNow(new Date(conversation.lastMessageTime), { addSuffix: false })}
                       </span>
                     </div>
-                    <p className="text-sm text-gray-400 truncate">
-                      {conversation.last_message?.content || 'Start a conversation'}
-                    </p>
-                    {conversation.unread_count > 0 && (
-                      <span className="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-purple-600 rounded-full mt-1">
-                        {conversation.unread_count}
-                      </span>
-                    )}
+                    
+                    <div className="flex items-center mt-1">
+                      <p className="text-xs text-light-muted truncate mr-2">{conversation.lastMessage}</p>
+                      
+                      {conversation.unread > 0 && (
+                        <span className="inline-flex items-center justify-center h-5 w-5 rounded-full bg-primary text-xs font-medium text-white">
+                          {conversation.unread}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </div>
+                </button>
               </li>
             ))}
           </ul>
-        ) : (
-          <div className="p-4 text-gray-400 text-center">
-            No conversations found
-          </div>
         )}
-      </div>
-      
-      <div className="p-4 border-t border-gray-800">
-        <button className="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-md font-medium transition-colors">
-          New Message
-        </button>
       </div>
     </div>
   );

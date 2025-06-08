@@ -1,112 +1,104 @@
-import { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
-const AuthContext = createContext(null);
+// Create context
+const AuthContext = createContext();
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};
+// Custom hook to use the auth context
+export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const token = localStorage.getItem('authToken');
-        
-        if (!token) {
-          setIsLoading(false);
-          return;
-        }
+  // Mock user for demo purposes
+  const demoUser = {
+    id: 'current-user',
+    name: 'Demo User',
+    username: 'demo_user',
+    email: 'demo@macro.com',
+    avatar_url: 'https://randomuser.me/api/portraits/men/32.jpg',
+    role: 'artist',
+    bio: 'Professional music producer and DJ',
+    location: 'Los Angeles, CA',
+    genres: ['Electronic', 'House', 'Techno']
+  };
 
-        // Set default auth header for all axios requests
-        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+  // Load user on mount (simulating fetching user data)
+  useEffect(() => {
+    const loadUser = async () => {
+      try {
+        // In a real app, you would fetch the user from your API
+        // const response = await axios.get('/api/auth/me');
+        // setUser(response.data);
         
-        // Get current user info
-        const response = await axios.get('/api/auth/me');
-        setUser(response.data);
-      } catch (err) {
-        console.error('Authentication error:', err);
-        localStorage.removeItem('authToken');
-        delete axios.defaults.headers.common['Authorization'];
-      } finally {
-        setIsLoading(false);
+        // For demo, use mock user
+        await new Promise(resolve => setTimeout(resolve, 500)); // Fake delay
+        setUser(demoUser);
+        setLoading(false);
+      } catch (error) {
+        setError(error);
+        setLoading(false);
       }
     };
 
-    checkAuth();
+    loadUser();
   }, []);
 
+  // Mock login function
   const login = async (email, password) => {
-    setIsLoading(true);
-    setError(null);
-    
     try {
-      const response = await axios.post('/api/auth/login', { email, password });
-      const { token, user: userData } = response.data;
+      setLoading(true);
+      // In a real app, you would call your API here
+      // const response = await axios.post('/api/auth/login', { email, password });
+      // localStorage.setItem('token', response.data.token);
       
-      localStorage.setItem('authToken', token);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      
-      setUser(userData);
-      return { success: true };
-    } catch (err) {
-      setError(err.response?.data?.message || 'Login failed. Please try again.');
-      return { success: false, error: err.response?.data?.message || 'Login failed' };
-    } finally {
-      setIsLoading(false);
+      // For demo, just set the user after a fake delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      setUser(demoUser);
+      localStorage.setItem('token', 'demo-token');
+      setLoading(false);
+      return true;
+    } catch (error) {
+      setError(error);
+      setLoading(false);
+      return false;
     }
   };
 
+  // Mock register function
   const register = async (userData) => {
-    setIsLoading(true);
-    setError(null);
-    
     try {
-      const response = await axios.post('/api/auth/register', userData);
-      const { token, user: newUser } = response.data;
+      setLoading(true);
+      // In a real app, you would call your API here
+      // const response = await axios.post('/api/auth/register', userData);
       
-      localStorage.setItem('authToken', token);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      
-      setUser(newUser);
-      return { success: true };
-    } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed. Please try again.');
-      return { success: false, error: err.response?.data?.message || 'Registration failed' };
-    } finally {
-      setIsLoading(false);
+      // For demo, just set the user after a fake delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      setUser(demoUser);
+      localStorage.setItem('token', 'demo-token');
+      setLoading(false);
+      return true;
+    } catch (error) {
+      setError(error);
+      setLoading(false);
+      return false;
     }
   };
 
+  // Mock logout function
   const logout = () => {
-    localStorage.removeItem('authToken');
-    delete axios.defaults.headers.common['Authorization'];
+    localStorage.removeItem('token');
     setUser(null);
-  };
-
-  const updateUser = (userData) => {
-    setUser(prevUser => ({
-      ...prevUser,
-      ...userData
-    }));
   };
 
   const value = {
     user,
-    isLoading,
+    loading,
     error,
     login,
     register,
-    logout,
-    updateUser
+    logout
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
